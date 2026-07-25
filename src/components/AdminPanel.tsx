@@ -291,7 +291,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser }) => {
         <form onSubmit={handleSaveConfig} className="bg-zinc-900 border border-zinc-800 rounded-sm p-6 space-y-6">
           <h3 className="text-base font-bold text-white flex items-center gap-2 uppercase tracking-wide">
             <SlidersHorizontal className="w-5 h-5 text-amber-400" />
-            <span>تنظیمات توکن ربات تلگرام، دیتابیس و ردیس</span>
+            <span>تنظیمات عمومی پلتفرم و حالت تعمیرات</span>
           </h3>
 
           {saveStatus && (
@@ -300,58 +300,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ currentUser }) => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wider">
-                توکن ربات تلگرام (TELEGRAM_BOT_TOKEN):
-              </label>
-              <input
-                type="text"
-                value={botToken}
-                onChange={(e) => setBotToken(e.target.value)}
-                placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ..."
-                className="w-full bg-[#050505] text-zinc-100 font-mono text-xs px-4 py-3 rounded-sm border border-zinc-800 focus:outline-none focus:border-amber-500"
-              />
+          {/* Info banner about .env configuration */}
+          <div className="p-4 bg-[#050505] border border-zinc-800 rounded-sm space-y-2 text-xs">
+            <div className="flex items-center gap-2 text-amber-400 font-bold">
+              <Key className="w-4 h-4" />
+              <span>پیکربندی متغیرهای محیطی (.env)</span>
             </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wider">
-                شناسه عددی مدیر کل (TELEGRAM_ADMIN_ID):
-              </label>
-              <input
-                type="text"
-                value={adminId}
-                onChange={(e) => setAdminId(e.target.value)}
-                placeholder="123456789"
-                className="w-full bg-[#050505] text-zinc-100 font-mono text-xs px-4 py-3 rounded-sm border border-zinc-800 focus:outline-none focus:border-amber-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wider">
-                آدرس دیتابیس (DATABASE_URL):
-              </label>
-              <input
-                type="text"
-                value={databaseUrl}
-                onChange={(e) => setDatabaseUrl(e.target.value)}
-                placeholder="postgresql://user:password@localhost:5432/gamebot_db"
-                className="w-full bg-[#050505] text-zinc-100 font-mono text-xs px-4 py-3 rounded-sm border border-zinc-800 focus:outline-none focus:border-amber-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-300 mb-2 uppercase tracking-wider">
-                آدرس کش ردیس (REDIS_URL):
-              </label>
-              <input
-                type="text"
-                value={redisUrl}
-                onChange={(e) => setRedisUrl(e.target.value)}
-                placeholder="redis://localhost:6379"
-                className="w-full bg-[#050505] text-zinc-100 font-mono text-xs px-4 py-3 rounded-sm border border-zinc-800 focus:outline-none focus:border-amber-500"
-              />
-            </div>
+            <p className="text-zinc-400 leading-relaxed">
+              اطلاعات حساس سرور (شامل توکن ربات تلگرام، آیدی عددی ادمین، اتصال دیتابیس PostgreSQL و Redis) مستقیماً از فایل <code className="text-amber-300 font-mono">.env</code> خوانده می‌شوند تا امنیت سرور حفظ شود و نیازی به وارد کردن مجدد در پنل نباشد.
+            </p>
           </div>
 
           <div className="pt-4 border-t border-zinc-800">

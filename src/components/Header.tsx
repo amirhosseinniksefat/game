@@ -1,10 +1,10 @@
 import React from 'react';
-import { Gamepad2, Bot, ShieldCheck, UserCheck, Activity, Key, BookOpen } from 'lucide-react';
+import { Gamepad2, ShieldCheck, UserCheck, Activity, Key, BookOpen } from 'lucide-react';
 import { UserProfile, PlatformStats } from '../types/index';
 
 interface HeaderProps {
-  activeTab: 'simulator' | 'hub' | 'admin' | 'docs';
-  setActiveTab: (tab: 'simulator' | 'hub' | 'admin' | 'docs') => void;
+  activeTab: 'hub' | 'admin' | 'docs';
+  setActiveTab: (tab: 'hub' | 'admin' | 'docs') => void;
   currentUser: UserProfile | null;
   stats: PlatformStats | null;
   onOpenProfile: () => void;
@@ -61,18 +61,6 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Navigation Tabs */}
         <nav className="flex items-center gap-2 overflow-x-auto pt-3 border-t border-zinc-900 text-xs font-bold no-scrollbar">
-          <button
-            onClick={() => setActiveTab('simulator')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-sm transition-all whitespace-nowrap uppercase tracking-wider ${
-              activeTab === 'simulator'
-                ? 'bg-white text-black shadow-sm font-black'
-                : 'text-zinc-400 hover:text-zinc-200 border border-transparent hover:border-zinc-800'
-            }`}
-          >
-            <Bot className="w-4 h-4" />
-            <span>شبیه‌ساز ربات تلگرام</span>
-          </button>
-
           <button
             onClick={() => setActiveTab('hub')}
             className={`flex items-center gap-2 px-4 py-2 rounded-sm transition-all whitespace-nowrap uppercase tracking-wider ${

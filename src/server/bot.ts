@@ -252,11 +252,85 @@ export class TelegramBotEngine {
           chat_id: chatId,
           text,
           parse_mode: 'Markdown',
-          reply_markup: replyMarkup,
+          reply_markup: replyMarkup ? { inline_keyboard: replyMarkup } : undefined,
         }),
       });
     } catch (err) {
       console.error('Failed to send Telegram API message:', err);
+    }
+  }
+
+  private isPolling = false;
+  private lastUpdateId = 0;
+
+  public async startPolling() {
+    if (this.isPolling) return;
+    if (!this.token) {
+      console.log('⚠️ TELEGRAM_BOT_TOKEN set نیست. ربات تلگرام غیرفعال است.');
+      return;
+    }
+
+    this.isPolling = true;
+    console.log('🚀 ربات تلگرام (Long Polling) با موفقیت فعال و آماده دریافت پیام شد!');
+
+    while (this.isPolling) {
+      try {
+        const url = `https://api.telegram.org/bot${this.token}/getUpdates?offset=${this.lastUpdateId + 1}&timeout=30`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && Array.isArray(data.result)) {
+            for (const update of data.result) {
+              this.lastUpdateId = update.update_id;
+              await this.processUpdate(update);
+            }
+          }
+        } else {
+          await new Promise((r) => setTimeout(r, 5000));
+        }
+      } catch (err) {
+        await new Promise((r) => setTimeout(r, 5000));
+      }
+    }
+  }
+
+  private async processUpdate(update: any) {
+    try {
+      if (update.message) {
+        const msg = update.message;
+        const from = msg.from;
+        if (!from) return;
+        const text = msg.text || '';
+        const reply = await this.handleMessage(
+          from.id.toString(),
+          from.username,
+          from.first_name + (from.last_name ? ` ${from.last_name}` : ''),
+          text
+        );
+        await this.sendTelegramApiMessage(from.id.toString(), reply.responseText, reply.inlineKeyboard);
+      } else if (update.callback_query) {
+        const query = update.callback_query;
+        const from = query.from;
+        if (!from) return;
+        const data = query.data || '';
+        let text = '/start';
+        if (data === 'menu_games') text = '/games';
+        else if (data === 'menu_profile') text = '/profile';
+        else if (data === 'menu_rooms') text = '/rooms';
+        else if (data === 'menu_friends') text = '/friends';
+        else if (data === 'menu_admin') text = '/admin';
+        else if (data === 'vs_bot_menu') text = '/vsbot';
+
+        const reply = await this.handleMessage(
+          from.id.toString(),
+          from.username,
+          from.first_name + (from.last_name ? ` ${from.last_name}` : ''),
+          text
+        );
+        await this.sendTelegramApiMessage(from.id.toString(), reply.responseText, reply.inlineKeyboard);
+      }
+    } catch (err) {
+      console.error('Error processing Telegram update:', err);
     }
   }
 }

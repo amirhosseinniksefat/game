@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Header } from './components/Header';
-import { TelegramSimulator } from './components/TelegramSimulator';
 import { WebGameHub } from './components/WebGameHub';
 import { AdminPanel } from './components/AdminPanel';
 import { DocsView } from './components/DocsView';
@@ -9,7 +8,7 @@ import { ReportModal } from './components/ReportModal';
 import { UserProfile, PlatformStats, GameRoom, GameType, ReportCategory } from './types/index';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'simulator' | 'hub' | 'admin' | 'docs'>('simulator');
+  const [activeTab, setActiveTab] = useState<'hub' | 'admin' | 'docs'>('hub');
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [currentRoom, setCurrentRoom] = useState<GameRoom | null>(null);
@@ -295,18 +294,6 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1">
-        {activeTab === 'simulator' && currentUser && (
-          <TelegramSimulator
-            currentUser={currentUser}
-            onLaunchGame={(roomId) => {
-              if (roomId) handleJoinRoomCode(roomId);
-              setActiveTab('hub');
-            }}
-            onOpenAdmin={() => setActiveTab('admin')}
-            onOpenProfile={() => setIsProfileOpen(true)}
-          />
-        )}
-
         {activeTab === 'hub' && currentUser && (
           <WebGameHub
             currentUser={currentUser}
