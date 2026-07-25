@@ -9,6 +9,29 @@ export class TelegramBotEngine {
     return db.getAdminConfig().adminId || process.env.TELEGRAM_ADMIN_ID || '123456789';
   }
 
+  private get appUrl(): string {
+    let url = process.env.APP_URL || '';
+    if (!url) {
+      url = 'https://t.me';
+    }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    return url;
+  }
+
+  private getMiniAppButton(customPath?: string) {
+    const targetUrl = customPath ? `${this.appUrl}${customPath}` : this.appUrl;
+    return [
+      [
+        {
+          text: '🎮 ورود به دنیای بازی',
+          web_app: { url: targetUrl },
+        },
+      ],
+    ];
+  }
+
   // Handle incoming telegram message or command
   public async handleMessage(
     telegramId: string,
@@ -20,6 +43,7 @@ export class TelegramBotEngine {
     if (config.maintenanceMode && telegramId !== this.adminId) {
       return {
         responseText: `⚠️ ${config.maintenanceMessage}`,
+        inlineKeyboard: this.getMiniAppButton(),
       };
     }
 
@@ -50,15 +74,19 @@ export class TelegramBotEngine {
                   ? 'منچ'
                   : 'مار و پله'
               }) پیوستید!`,
-              inlineKeyboard: [
-                [{ text: '🎮 ورود به بازی', web_app: { url: `/game/${room.id}` } }],
-              ],
+              inlineKeyboard: this.getMiniAppButton(`?room=${room.id}`),
             };
           } catch (err: any) {
-            return { responseText: `❌ خطا در ورود به اتاق: ${err.message}` };
+            return {
+              responseText: `❌ خطا در ورود به اتاق: ${err.message}`,
+              inlineKeyboard: this.getMiniAppButton(),
+            };
           }
         } else {
-          return { responseText: '❌ اتاق مورد نظر یافت نشد یا منقضی شده است.' };
+          return {
+            responseText: '❌ اتاق مورد نظر یافت نشد یا منقضی شده است.',
+            inlineKeyboard: this.getMiniAppButton(),
+          };
         }
       }
 
@@ -69,77 +97,28 @@ export class TelegramBotEngine {
       return this.getProfileResponse(user);
     }
 
-    if (trimmedText === '/games' || trimmedText === '🎮 شروع بازی') {
-      return this.getGamesMenu();
-    }
-
-    if (trimmedText === '/vsbot' || trimmedText === '🤖 بازی تک‌نفره با ربات') {
-      return {
-        responseText: '🤖 **بازی تک‌نفره با ربات هوشمند (AI):**\nلطفاً بازی مورد نظر خود برای رقابت با ربات را انتخاب کنید:',
-        inlineKeyboard: [
-          [{ text: '❌⭕ دوز تک‌نفره (vs AI Bot)', callback_data: 'vs_bot_tictactoe' }],
-          [{ text: '🎲 منچ تک‌نفره (vs AI Bot)', callback_data: 'vs_bot_ludo' }],
-          [{ text: '🐍🪜 مار و پله تک‌نفره (vs AI Bot)', callback_data: 'vs_bot_snakes' }],
-          [{ text: '🔙 بازگشت به منوی اصلی', callback_data: 'menu_start' }],
-        ],
-      };
-    }
-
-    if (trimmedText === '/rooms' || trimmedText === '🚪 لیست اتاق‌ها') {
-      return this.getRoomsListResponse();
-    }
-
-    if (trimmedText === '/friends' || trimmedText === '👥 دوستان') {
-      return this.getFriendsResponse(user);
-    }
-
     if (trimmedText === '/admin' || trimmedText === '⚙️ پنل مدیریت') {
       if (telegramId === this.adminId) {
         return this.getAdminMenu();
       } else {
-        return { responseText: '❌ شما دسترسی ادمین ندارید.' };
+        return {
+          responseText: '❌ شما دسترسی ادمین ندارید.',
+          inlineKeyboard: this.getMiniAppButton(),
+        };
       }
     }
 
-    if (trimmedText === '/help' || trimmedText === '❓ راهنما') {
-      return {
-        responseText: `📚 **راهنمای پلتفرم بازی آنلاین تلگرام**
-
-🎮 **بازی‌های موجود:**
-• **دوز (Tic Tac Toe):** ۲ نفره، تلاش برای قرار دادن ۳ علامت در یک خط.
-• **منچ (Ludo):** ۲ تا ۴ نفره، آوردن تاس ۶ برای خروج مهره و رساندن تمام مهره‌ها به مقصد.
-• **مار و پله (Snakes and Ladders):** ۲ تا ۴ نفره، حرکت بر روی صفحه ۱۰۰ خانه‌ای با نردبان و مار.
-
-🔗 **دعوت از دوستان:**
-با ایجاد اتاق خصوصی می‌توانید کد یا لینک اختصاصی اتاق را برای دوستانتان بفرستید تا سریعاً ملحق شوند.
-
-💬 **چت و گزارش:**
-در حین بازی می‌توانید به صورت زنده چت کنید یا در صورت بروز تخلف، کاربر را گزارش کنید.`,
-      };
-    }
-
-    // Default response
-    return {
-      responseText: `🤖 پیام شما دریافت شد: "${trimmedText}"\nلطفاً یکی از گزینه‌های منو را انتخاب کنید:`,
-      inlineKeyboard: [
-        [{ text: '🎮 انتخاب بازی', callback_data: 'menu_games' }, { text: '👤 پروفایل', callback_data: 'menu_profile' }],
-        [{ text: '🚪 لیست اتاق‌ها', callback_data: 'menu_rooms' }, { text: '⚙️ پنل مدیریت', callback_data: 'menu_admin' }]
-      ]
-    };
+    // Default welcome/menu response for any message
+    return this.getWelcomeMenu(user);
   }
 
   private getWelcomeMenu(user: any) {
     return {
       responseText: `سلام ${user.displayName} عزیز! 👋
-به **پلتفرم جامع بازی‌های چندنفره آنلاین تلگرام** خوش آمدید.
+به **پلتفرم جامع بازی‌های آنلاین تلگرام** خوش آمدید.
 
-یک بازی انتخاب کنید، با دوستان خود، بازیکنان آنلاین یا **ربات هوشمند (تک‌نفره)** رقابت کنید!`,
-      inlineKeyboard: [
-        [{ text: '🎮 شروع بازی جدید (چندنفره)', callback_data: 'menu_games' }],
-        [{ text: '🤖 بازی تک‌نفره با ربات (vs Bot)', callback_data: 'vs_bot_menu' }],
-        [{ text: '👤 پروفایل کاربری', callback_data: 'menu_profile' }, { text: '🚪 لیست اتاق‌ها', callback_data: 'menu_rooms' }],
-        [{ text: '👥 دوستان من', callback_data: 'menu_friends' }, { text: '⚙️ پنل مدیریت', callback_data: 'menu_admin' }]
-      ],
+جهت ورود به بازی‌ها (دوز، منچ، مار و پله) و استفاده از مینی‌اپ، روی دکمه زیر کلیک کنید:`,
+      inlineKeyboard: this.getMiniAppButton(),
     };
   }
 
@@ -149,76 +128,13 @@ export class TelegramBotEngine {
 
 🆔 شناسه تلگرام: \`${user.telegramId}\`
 🏷️ نام نمایش: **${user.displayName}**
-📛 نام کاربری: @${user.username}
 🏅 رتبه: **${user.rank}**
 💰 سکه‌ها: **${user.coins}**
 
 📊 **آمار بازی‌ها:**
 • مجموع بازی‌ها: ${user.gamesPlayed}
-• بردها: 🏆 ${user.wins}
-• باخت‌ها: ❌ ${user.losses}
-• مساوی‌ها: 🤝 ${user.draws}
-• درصد برد: **${user.winRate}%**
-
-👥 تعداد دوستان: ${user.friends.length}`,
-      inlineKeyboard: [
-        [{ text: '👥 مشاهده دوستان', callback_data: 'menu_friends' }],
-        [{ text: '🔙 بازگشت به منوی اصلی', callback_data: 'menu_start' }]
-      ],
-    };
-  }
-
-  private getGamesMenu() {
-    return {
-      responseText: '🎮 **لطفاً یکی از بازی‌های زیر را جهت شروع انتخاب کنید:**',
-      inlineKeyboard: [
-        [{ text: '❌⭕ دوز (Tic Tac Toe)', callback_data: 'create_tictactoe' }],
-        [{ text: '🎲 منچ (Ludo)', callback_data: 'create_ludo' }],
-        [{ text: '🐍🪜 مار و پله (Snakes & Ladders)', callback_data: 'create_snakes' }],
-        [{ text: '🔍 جستجوی سریع بازی (Matchmaking)', callback_data: 'quick_match' }],
-      ],
-    };
-  }
-
-  private getRoomsListResponse() {
-    const activeRooms = db.getActiveRooms();
-    if (activeRooms.length === 0) {
-      return {
-        responseText: '🚪 در حال حاضر هیچ اتاق فعالی وجود ندارد. می‌توانید همین حالا یک اتاق جدید بسازید!',
-        inlineKeyboard: [[{ text: '➕ ساخت اتاق جدید', callback_data: 'menu_games' }]],
-      };
-    }
-
-    const roomText = activeRooms
-      .slice(0, 5)
-      .map(
-        (r) =>
-          `• **کد ${r.code}** | بازی: ${
-            r.gameType === 'tictactoe' ? 'دوز' : r.gameType === 'ludo' ? 'منچ' : 'مار و پله'
-          } | نفرات: (${r.players.length}/${r.maxPlayers}) | وضعیت: ${
-            r.status === 'waiting' ? 'در انتظار بازیکن' : 'در حال اجرا'
-          }`
-      )
-      .join('\n');
-
-    return {
-      responseText: `🚪 **لیست اتاق‌های فعال:**\n\n${roomText}`,
-      inlineKeyboard: [[{ text: '➕ ساخت اتاق جدید', callback_data: 'menu_games' }]],
-    };
-  }
-
-  private getFriendsResponse(user: any) {
-    const friends = user.friends
-      .map((fId: string) => db.getUser(fId))
-      .filter(Boolean);
-
-    const friendListText = friends.length
-      ? friends.map((f: any) => `• **${f.displayName}** (@${f.username}) - وضعیت: ${f.status === 'online' ? '🟢 آنلاین' : '🔴 آفلاین'}`).join('\n')
-      : 'هنوز هیچ دوستی اضافه نکرده‌اید.';
-
-    return {
-      responseText: `👥 **لیست دوستان شما:**\n\n${friendListText}`,
-      inlineKeyboard: [[{ text: '🔙 بازگشت به اصلی', callback_data: 'menu_start' }]],
+• بردها: 🏆 ${user.wins} | باخت‌ها: ❌ ${user.losses}`,
+      inlineKeyboard: this.getMiniAppButton(),
     };
   }
 
@@ -231,12 +147,8 @@ export class TelegramBotEngine {
 👥 کاربران کل: **${stats.totalUsers}**
 🟢 آنلاین: **${stats.onlineUsers}**
 🚪 اتاق‌های فعال: **${stats.activeRooms}**
-🎮 کل بازی‌ها: **${stats.totalGamesPlayed}**
-⚠️ گزارشات بررسی نشده: **${stats.pendingReportsCount}**`,
-      inlineKeyboard: [
-        [{ text: '🖥️ ورود به داشبورد کامل مدیریت وب', callback_data: 'open_admin_panel' }],
-        [{ text: '🔙 بازگشت', callback_data: 'menu_start' }],
-      ],
+🎮 کل بازی‌ها: **${stats.totalGamesPlayed}**`,
+      inlineKeyboard: this.getMiniAppButton(),
     };
   }
 
