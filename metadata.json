@@ -1,0 +1,6 @@
+{
+  "name": "پلتفرم بازی آنلاین تلگرام",
+  "description": "پلتفرم چندنفره بازی‌های آنلاین تلگرام شامل دوز، منچ و مار و پله با چت زنده، سیستم اتاق، گزارش و پنل مدیریت کامل",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
