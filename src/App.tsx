@@ -94,8 +94,17 @@ export default function App() {
         if (res.ok) {
           const data = await res.json();
           if (data.room) {
-            setCurrentRoom(data.room);
-            if (data.chat) setChatMessages(data.chat);
+            setCurrentRoom((prev) => {
+              if (!prev) return data.room;
+              if (JSON.stringify(prev) === JSON.stringify(data.room)) return prev;
+              return data.room;
+            });
+            if (data.chat) {
+              setChatMessages((prev) => {
+                if (JSON.stringify(prev) === JSON.stringify(data.chat)) return prev;
+                return data.chat;
+              });
+            }
           }
         }
       } catch (err) {

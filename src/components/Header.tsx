@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex flex-wrap items-center justify-between lg:justify-end gap-4 text-xs font-mono">
             <div className="flex items-center gap-2 bg-zinc-900/80 px-3 py-1.5 rounded-sm border border-zinc-800 text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>سرور فعال — {stats?.onlineUsers || 1} بازیکن آنلاین</span>
+              <span>سرور فعال — {stats?.onlineUsers || 1} کاربر آنلاین</span>
             </div>
 
             {currentUser && (

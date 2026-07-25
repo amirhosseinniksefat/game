@@ -106,6 +106,7 @@ async function startServer() {
     const now = Date.now();
 
     activeRooms.forEach((room) => {
+      if (!room.players || room.players.length === 0) return;
       if (room.turnDeadline && now > room.turnDeadline) {
         // Turn timed out -> auto pass turn or timeout
         db.addChatMessage(
@@ -131,7 +132,8 @@ async function startServer() {
           room.currentTurnUserId = room.players[nextIdx].id;
         }
 
-        room.turnDeadline = Date.now() + room.turnTimeout * 1000;
+        const timeoutSec = room.turnTimeout || 30;
+        room.turnDeadline = Date.now() + timeoutSec * 1000;
         db.updateRoom(room);
         broadcastRoomUpdate(room.id);
       }

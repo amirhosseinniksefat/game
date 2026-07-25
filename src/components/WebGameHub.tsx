@@ -77,9 +77,6 @@ export const WebGameHub: React.FC<WebGameHubProps> = ({
                       : 'مار و پله'}
                   </span>
                 </div>
-                <p className="text-xs text-zinc-400 font-mono">
-                  تعداد بازیکنان: ({currentRoom.players.length}/{currentRoom.maxPlayers})
-                </p>
               </div>
             </div>
 
@@ -164,35 +161,6 @@ export const WebGameHub: React.FC<WebGameHubProps> = ({
                 />
               </>
             )}
-          </div>
-
-          {/* Players Bar */}
-          <div className="pt-4 border-t border-zinc-800 grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {currentRoom.players.map((p) => (
-              <div
-                key={p.id}
-                className="bg-[#050505] p-2.5 rounded-sm border border-zinc-800 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <div
-                    style={{ backgroundColor: p.color || '#10b981' }}
-                    className="w-3 h-3 rounded-full flex-shrink-0"
-                  ></div>
-                  <span className="text-xs font-bold text-zinc-200 truncate">
-                    {p.displayName}
-                  </span>
-                </div>
-                {p.id !== currentUser.id && (
-                  <button
-                    onClick={() => onOpenReportModal(p.id)}
-                    title="گزارش تخلف کاربر"
-                    className="text-zinc-500 hover:text-rose-400 p-1 transition-colors"
-                  >
-                    <Flag className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            ))}
           </div>
 
         </div>
